@@ -1,0 +1,12 @@
+﻿syntax = "proto3";
+option csharp_namespace = "CloudBoardAttestationAPI";
+
+service AttestationService {
+    rpc GetAttestation (AttestationRequest) returns (AttestationResponse) {}
+}
+
+message AttestationRequest {}
+
+message AttestationResponse {
+    bytes attestationBundle = 1;
+}

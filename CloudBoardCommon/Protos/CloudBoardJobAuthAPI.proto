@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option csharp_namespace = "CloudBoardJobAuthAPI";
+
+service JobAuth {
+  rpc RequestTGTSigningKeys (Request) returns (stream KeyResponse) {}
+  rpc RequestOTTSigningKeys (Request) returns (stream KeyResponse) {}
+}
+
+message Request {}
+
+message KeyResponse {
+  bytes publicKeyDer = 1;
+}

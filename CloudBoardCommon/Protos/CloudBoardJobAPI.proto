@@ -1,0 +1,16 @@
+﻿syntax = "proto3";
+option csharp_namespace = "CloudBoardJobAPI";
+
+service JobService {
+    rpc HandleJobRequest (JobRequest) returns (JobResponse) {}
+}
+
+message JobRequest {
+  string jobId = 1; // UUID as string
+  bytes requestData = 2; // Encrypted request data
+}
+
+message JobResponse {
+  string jobId = 1; // UUID as string
+  bytes responseData = 2; // Encrypted response data
+}
