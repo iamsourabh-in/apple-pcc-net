@@ -1,6 +1,6 @@
 # PCC.NET - A .NET C# Implementation of Apple's Personal Cloud Computing Architecture
 
-A project structure mirroring the Swift PCC architecture in .NET C#, focusing on daemon processes, inter-process communication (IPC), metrics, health checks, and service discovery. We'll leverage the insights gained from the Swift code.
+A project structure mirroring the PCC architecture in .NET C#, focusing on daemon processes, inter-process communication (IPC), External Services, Gateway, metrics, health checks, and service discovery. We'll leverage the insights gained from the Swift code.
 
 ## I. Project Structure (.NET C#)
 
