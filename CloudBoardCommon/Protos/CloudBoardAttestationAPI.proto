@@ -2,11 +2,36 @@
 option csharp_namespace = "CloudBoardAttestationAPI";
 
 service AttestationService {
-    rpc GetAttestation (AttestationRequest) returns (AttestationResponse) {}
+  rpc GetAttestation (AttestationRequest) returns (AttestationResponse) {}
+  rpc GetAttestedKeySet (AttestationRequest) returns (AttestedKeySet) {} // Added for KeySet
+  rpc AttestationRotated (AttestationSet) returns (AttestationResponse) {} // Added for KeySet
 }
 
 message AttestationRequest {}
 
 message AttestationResponse {
     bytes attestationBundle = 1;
+}
+
+message AttestedKey {
+  bytes keyData = 1;
+  string keyId = 2;
+  int64 expiry = 3; // Unix timestamp in milliseconds
+  int64 publicationExpiry = 4; // Unix timestamp in milliseconds
+
+}
+
+message AttestedKeySet {
+  AttestedKey currentKey = 1;
+  repeated AttestedKey unpublishedKeys = 2;
+}
+
+
+message AttestationSet {
+    Attestation currentAttestation = 1;
+    repeated Attestation unpublishedAttestations = 2;
+}
+
+message Attestation {
+  AttestedKey key = 1;
 }

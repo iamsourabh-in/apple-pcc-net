@@ -48,6 +48,48 @@ public class AttestationService : CloudBoardAttestationAPI.AttestationService.At
         }
 
     }
+
+    public override async Task<AttestedKeySet> GetAttestedKeySet(AttestationRequest request, ServerCallContext context)
+    {
+        return await CreateAttestedKeySetAsync(context.CancellationToken);
+    }
+
+
+    public override Task<AttestationResponse> AttestationRotated(AttestationSet request, ServerCallContext context)
+    {
+        //Handle rotated attestation
+        return Task.FromResult(new AttestationResponse());
+    }
+
+    private async Task<AttestationResponse> CreateAttestationAsync(CancellationToken cancellationToken)
+    {
+        // Simulate attestation generation (INSECURE - replace with secure attestation for production)
+        return new AttestationResponse { AttestationBundle = ByteString.CopyFrom(GenerateAttestationBundle()) };
+    }
+
+
+    private async Task<AttestedKeySet> CreateAttestedKeySetAsync(CancellationToken cancellationToken)
+    {
+        return new AttestedKeySet
+        {
+            CurrentKey = await CreateAttestedKeyAsync(cancellationToken),
+            //Add unpublished keys here
+        };
+
+    }
+
+    public async Task<AttestedKey> CreateAttestedKeyAsync(CancellationToken cancellationToken)
+    {
+        // Simulate creating an attested key (INSECURE - replace with secure key generation for production)
+        return new AttestedKey
+        {
+            KeyData = ByteString.CopyFrom(GenerateAttestationBundle()),
+            KeyId = Guid.NewGuid().ToString(),
+            Expiry = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeMilliseconds(),
+            PublicationExpiry = DateTimeOffset.UtcNow.AddDays(0.5).ToUnixTimeMilliseconds(), // Half life
+        };
+
+    }
 }
 
 
@@ -92,3 +134,4 @@ public class MetricServer
     public Task StartAsync() => _webHost.StartAsync();
     public Task StopAsync() => _webHost.StopAsync();
 }
+
