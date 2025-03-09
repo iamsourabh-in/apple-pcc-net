@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudBoardAttestationD", "CloudBoardAttestationD\CloudBoardAttestationD.csproj", "{D401C9E4-DF0E-4A5F-A2E2-DDBC03326DD3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransparencyLogService", "TransparencyLogService\TransparencyLogService.csproj", "{E5256973-45E2-4F69-BB47-93D964FFC99E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{D401C9E4-DF0E-4A5F-A2E2-DDBC03326DD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D401C9E4-DF0E-4A5F-A2E2-DDBC03326DD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D401C9E4-DF0E-4A5F-A2E2-DDBC03326DD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5256973-45E2-4F69-BB47-93D964FFC99E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5256973-45E2-4F69-BB47-93D964FFC99E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5256973-45E2-4F69-BB47-93D964FFC99E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5256973-45E2-4F69-BB47-93D964FFC99E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

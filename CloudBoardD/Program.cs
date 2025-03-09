@@ -21,6 +21,8 @@ using Serilog;
 using Polly;
 using Consul;
 using NodeInfo = CloudBoardCommon.NodeInfo;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using System.Net;
 
 // Define a simple gRPC service for health checks
 public class HealthCheckService //: CloudBoardCommon.HealthCheck.HealthCheckBase
@@ -44,7 +46,10 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.WebHost.UseUrls("http://localhost:5002/");
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.Listen(IPAddress.Any, 9001, o => o.Protocols = HttpProtocols.Http1AndHttp2); // Or specify a different port
+        });
         // ... inside the Program class ...
         builder.Host.UseSerilog((context, services, loggerConfiguration) =>
         {

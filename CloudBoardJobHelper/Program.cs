@@ -11,13 +11,18 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using System.Net;
 
 public class Program
 {
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.WebHost.UseUrls("http://localhost:5003/");
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.Listen(IPAddress.Any, 9002, o => o.Protocols = HttpProtocols.Http1AndHttp2); // Or specify a different port
+        });
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
         // Add services to the container.
