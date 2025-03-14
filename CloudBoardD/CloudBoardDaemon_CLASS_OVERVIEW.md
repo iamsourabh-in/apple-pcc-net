@@ -132,6 +132,171 @@
 19. **CloudBoardAttestationAPIXPCClient**: Communicates with `cb_attestationd`.
 20. **CloudBoardJobAuthAPIXPCClient**: Communicates with `cb_jobauthd`.
 
+
+```mermaid
+sequenceDiagram
+    participant CB as CloudBoardDaemon
+    participant CM as CloudMetricsSystem
+    participant SM as StatusMonitor
+    participant RFM as RequestFielderManager
+    participant XPC as CloudBoardJobHelperXPCClientProvider
+    participant JRP as JobHelperResponseDelegateProvider
+    participant HP as HotPropertiesController
+    participant SD as ServiceDiscoveryPublisher
+    participant HM as HealthMonitor
+    participant HS as HealthServer
+    participant AP as AttestationProvider
+    participant CBProvider as CloudBoardProvider
+    participant IM as IdentityManager
+    participant Heartbeat as HeartbeatPublisher
+    participant WC as WorkloadController
+    participant Server as gRPC Server
+    participant JQM as JobQuiescenceMonitor
+    participant LJH as LaunchdJobHelper
+    participant CA as CloudBoardAttestationAPIXPCClient
+    participant JA as CloudBoardJobAuthAPIXPCClient
+    
+    Note right of CB: CloudBoardDaemon Initialization
+    CB->>+CM: Initialize
+    CB->>+SM: Initialize
+    CB->>+RFM: Initialize
+    CB->>+XPC: Initialize
+    CB->>+JRP: Initialize
+    CB->>+HP: Initialize
+    CB->>+HM: Initialize
+    CB->>+HS: Initialize
+    alt ServiceDiscovery Configured
+      CB->>SD: Initialize
+    end
+    alt AttestationProvider not injected
+      CB->>CA: Initialize local XPC
+      CB->>+AP: Initialize with XPC
+    else AttestationProvider injected
+       CB->>AP: Initialize with injected provider
+    end
+    alt Heartbeat Configured
+      CB->>+Heartbeat: Initialize
+    end
+    CB->>+WC: Initialize
+    CB->>JQM: Initialize
+    CB-->>CB: Configuration Loading and initialization complete.
+    Note over CB,JQM: Start operation
+    CB->>+LJH: cleanupManagedLaunchdJobs
+    activate LJH
+    LJH-->>CB: Complete
+    deactivate LJH
+    CB->>+JQM: startQuiescenceMonitor
+    activate JQM
+    JQM-->>CB: Complete
+    deactivate JQM
+    CB->>CB: lifecycleManager.managed{
+    CB->>+IM: Initialize
+    activate IM
+    alt Insecure Listener = false
+        IM-->>CB: loadTLSIdentity()
+    else Insecure Listener = true
+        IM-->>CB: No TLS Identity
+    end
+    deactivate IM
+    alt HotProperties Enabled
+        CB->>+HP: info("Hot properties are enabled.")
+    else HotProperties Disabled
+        CB->>+HP: info("Hot properties are disabled.")
+    end
+    alt Heartbeats Enabled
+        CB->>+Heartbeat: info("Heartbeats are enabled.")
+        CB->>Heartbeat: updateCredentialProvider { identityManager.identity?.credential }
+    else Heartbeats Disabled
+        CB->>+Heartbeat: info("Heartbeats are disabled.")
+    end
+    CB-->>CB: resolveServiceAddress
+    alt Service Discovery Configured
+        CB->>SD: Initialize
+        CB->>SD: register(localIdentityCallback)
+    else Service Discovery Injected
+        CB->>SD: Using injected Service Discovery
+    else Service Discovery not Configured
+        CB->>SD: Service Discovery not enabled
+    end
+    CB->>HM: init HealthProvider
+    CB->>AP: init
+    Note right of CB: CloudBoardProvider Initialization
+    CB->>+CBProvider: Initialize
+    activate CBProvider
+    CBProvider-->>CB: Completed
+    deactivate CBProvider
+    alt requestFielderManager is present
+        CB->>RFM: run()
+    end
+    CB->>AP: run()
+    CB->>SM: waitingForFirstAttestationFetch()
+    CB->>AP: currentAttestationSet()
+    AP-->>CB: Return AttestationSet
+    CB->>SM: waitingForFirstKeyFetch()
+    alt blockHealthinessOnAuthSigningKeysPresence
+        CB->>JA: connect()
+        CB->>JA: requestTGTSigningKeys()
+        JA-->>CB: Return tgtSigningPublicKeyDERs
+        CB->>JA: requestOTTSigningKeys()
+        JA-->>CB: Return ottSigningPublicKeyDERs
+        alt !tgtSigningPublicKeyDERs.isEmpty & !ottSigningPublicKeyDERs.isEmpty
+            Note right of CB: Validated Keys
+        else Missing keys
+            CB-->>CB: Throw error InitializationError.missingAuthTokenSigningKeys
+        end
+    else no check
+        CB-->>CB: Skip verification
+    end
+    CB->>SM: waitingForFirstHotPropertyUpdate()
+    CB->>CBProvider: run()
+    CB->>IM: identityUpdateLoop()
+    alt Service Discovery Configured
+        CB->>HP: waitForFirstUpdate()
+        CB->>SM: waitingForWorkloadRegistration()
+        CB->>SD: run()
+        SD-->>CB: Service Discovery started
+    end
+    CB->>HP: waitForFirstUpdate()
+    CB->>HM: run()
+    CB->>HM: drain()
+    CB->>HS: run()
+    CB->>Heartbeat: run()
+    CB->>+Server: Run gRPC server
+    activate Server
+    alt Insecure Listener = false
+        Server->>Server: GRPCTLSConfiguration.cloudboardProviderConfiguration()
+    else Insecure Listener = true
+        Server->>Server: insecure(group:)
+    end
+    Server->>Server: bind()
+    Server-->>CB: Server started
+    deactivate Server
+    alt workloadController is present
+        CB->>WC: run(serviceDiscoveryPublisher,concurrentRequestCountStream, providerPause)
+        WC-->>CB: workloadController started
+    end
+    alt hotProperties is present
+        CB->>HP: run(metrics)
+        HP-->>CB: Hot properties started
+    end
+    Note over CB: waiting for one of the previous tasks to end
+    alt task completed
+      CB-->>CB: task completed
+      CB->>CB: group.cancelAll()
+    end
+    CB->>CB: } onDrain:{
+    CB->>SM: daemonDrained()
+    alt activeRequests present and drainDuration present
+        CB->>CM: Emit Metrics.CloudBoardDaemon.DrainCompletionTimeHistogram(drainDuration,activeRequests)
+    end
+    CB->>JQM: quiesceCompleted()
+    CB-->>CB: Continue or exit
+
+```
+
+
 ---
 
 This sequence diagram and explanation should give a comprehensive understanding of how **CloudBoardDaemon** works. Let me know if you have any other questions.
+
+
