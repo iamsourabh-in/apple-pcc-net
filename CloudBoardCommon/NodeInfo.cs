@@ -11,7 +11,7 @@ namespace CloudBoardCommon
         public string OSVersion { get; set; }
         public string OS { get; set; }
         public string DeviceModel { get; set; }
-        public bool IsLeader { get { return NodeType == NodeTypeEnum.Leader; } }
+        public bool? IsLeader { get { return NodeType == NodeTypeEnum.Leader; } }
         public NodeTypeEnum NodeType { get; set; }
         public NodeInfo()
         {
@@ -19,6 +19,9 @@ namespace CloudBoardCommon
             DeviceModel = "MAC";
             OS = "MAC";
             OSVersion = "1";
+        }
+        public static NodeInfo Load() {
+            return new NodeInfo();
         }
     }
 
